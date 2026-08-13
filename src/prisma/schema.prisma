@@ -1,0 +1,63 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+}
+
+enum StatusLead {
+  NOVO
+  EM_ANDAMENTO
+  RESPONDIDO
+  ARQUIVADO
+}
+
+// Usuários da plataforma (Admins do painel e Clientes do portal)
+model User {
+  id           String   @id @default(uuid())
+  nome         String
+  email        String   @unique
+  senhaHash    String
+  role         Role     @default(CLIENTE)
+  empresa      String?
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Mensagens de Contato / Leads recebidos pela HomePage
+model Mensagem {
+  id               String     @id @default(uuid())
+  nome             String
+  email            String
+  telefone         String?
+  servicoInteresse String?
+  mensagem         String
+  status           StatusLead @default(NOVO)
+  createdAt        DateTime   @default(now())
+}
+
+// Conteúdo editável do site (usado pelo ConteudoContext)
+model ConteudoSite {
+  id        String   @id @default("global")
+  heroTitle String
+  heroSub   String
+  servicos  Json     // Array de serviços editáveis no painel
+  updatedAt DateTime @updatedAt
+}
+
+// Configurações e integrações (Telegram Bot, WhatsApp, etc.)
+model ConfigIntegracao {
+  id            String   @id @default("global")
+  telegramToken String?
+  telegramChatId String?
+  whatsappNumber String?
+  updatedAt     DateTime @updatedAt
+}
